@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+option csharp_namespace = "WebApi.Protos";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+service ManejadorSesiones {
+	rpc VerificarToken (SolicitudVerificarToken) returns (google.protobuf.BoolValue);
+	rpc ObtenerSesion (SolicitudVerificarToken) returns (RespuestaDatosUsuario);
+	rpc AutenticarUsuario (CredencialesUsuario) returns (RespuestaAutenticacion);
+	rpc RenovarAutenticacionUsuario (ParTokens) returns (RespuestaAutenticacion);
+	rpc CerrarSesionUsuario (SolicitudVerificarToken) returns (RespuestaCerradoSesion);
+	rpc AutenticarServicio (CredencialesUsuario) returns (RespuestaAutenticacionServicio);
+}
+
+message SolicitudVerificarToken {
+	string bearer_token = 1;
+}
+
+message CredencialesUsuario {
+	string usuario = 1;
+	string clave = 2;
+}
+
+message ParTokens {
+	string bearer_token = 1;
+	string refresh_token = 2;
+	google.protobuf.Timestamp timestamp_expiracion_utc = 3;
+}
+
+message Rol {
+	uint32 rol_id = 1;
+	string descripcion_rol = 2;
+}
+
+message RolesApp {
+	uint32 app_id = 1;
+	repeated Rol roles = 2;
+}
+
+message RespuestaDatosUsuario {
+	string nombre_usuario = 1;
+	string numero_documento = 2;
+	uint64 codigo_usuario = 3;
+	repeated RolesApp roles = 4;
+	google.protobuf.Timestamp timestamp_expiracion_utc = 5;
+	google.protobuf.Timestamp timestamp_ingreso_utc = 6;
+	string sesion_id = 7;
+	repeated AtributoSesion atributos = 8;
+}
+
+message AtributoSesion {
+	string clave = 1;
+	optional google.protobuf.Any valor = 2;
+}
+
+message RespuestaAutenticacion {
+	ParTokens par_tokens = 1;
+	RespuestaDatosUsuario datos_usuario = 2;
+}
+
+message RespuestaAutenticacionServicio {
+	string token = 1;
+	uint32 timestamp_expiracion = 2;
+}
+
+message RespuestaCerradoSesion {
+	bool exito = 1;
+}
+
+message ClaveValor {
+	string clave = 1;
+	string valorStr = 2;
+}
+
+message Lista {
+	repeated ClaveValor valores = 1;
+}
+
+message SolicitudGuardarLista{
+	uint32 AppID = 1;
+	uint64 CodigoUsuario = 2;
+	Lista Lista = 3;
+}
+
+message RespuestaGuardarLista{
+	bool exito = 1;
+	string mensaje = 2;
+}
+
+message RespuestaObtenerLista{
+	bool exito = 1;
+	Lista Lista = 2;
+}
+
